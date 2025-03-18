@@ -103,6 +103,15 @@ async function setupProject() {
     console.log('✅ Database seeded successfully');
   }
 
+  // Add Pagila sample database option
+  const installPagila = (await prompt('Do you want to install the Pagila sample database? (Y/n): ')).toLowerCase() !== 'n';
+  
+  if (installPagila && runMigrations) {
+    console.log('\n📊 Importing Pagila sample database...');
+    execSync(`./import_pagila.sh ${config.POSTGRES_DB}`, { stdio: 'inherit' });
+    console.log('✅ Pagila database imported successfully');
+  }
+
   console.log('\n🎉 Setup completed successfully!');
   console.log('\nYou can now start the development server with:');
   console.log('npm run dev');

@@ -65,7 +65,7 @@ services:
     ports:
       - '3001:3001'
     environment:
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL=${DATABASE_URL_DOCKER}
       - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
       - TYPESENSE_HOST=${TYPESENSE_HOST}
       - NODE_ENV=${NODE_ENV}

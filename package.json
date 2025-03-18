@@ -19,6 +19,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "db:migrate": "turbo db:migrate",
     "db:generate": "turbo db:generate",
+    "db:seed": "turbo db:seed",
+    "db:setup": "turbo db:setup",
     "setup": "node setup.js"
   },
   "devDependencies": {
