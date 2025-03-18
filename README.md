@@ -1,13 +1,13 @@
 <div align="center">
   <h1>Fantastic Adventure</h1>
-  <p><em>Modern web application boilerplate with multi-tenancy support</em></p>
+  <p><em>A ready-to-use web application boilerplate with multi-tenancy support</em></p>
   
   <p>
+    <a href="#getting-started">Getting Started</a> •
+    <a href="#customization">Customization</a> •
+    <a href="#deployment">Deployment</a> •
     <a href="#features">Features</a> •
-    <a href="#architecture">Architecture</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#setup">Setup</a> •
-    <a href="#deployment">Deployment</a>
+    <a href="#prerequisites">Prerequisites</a>
   </p>
 </div>
 
@@ -15,122 +15,89 @@
 
 ## 🚀 Overview
 
-This is a modern, full-stack web application boilerplate that provides a solid foundation for building scalable, multi-tenant applications. It features a monorepo structure with shared packages, type-safe API and database access, and fast search capabilities.
+This boilerplate provides a production-ready foundation for building scalable web applications with built-in multi-tenant capabilities. Use this template to accelerate development of your next SaaS project or custom web application.
+
+## 🏁 Getting Started
+
+```bash
+# Clone this repository
+git clone https://github.com/yourusername/fantastic-adventure.git
+cd fantastic-adventure
+
+# Run the setup script to configure your environment
+npm run setup
+
+# Start development mode
+npm run dev
+```
+
+After running the setup script, you'll have a fully configured development environment with sample data. Access the application at http://localhost:3000 with default credentials:
+- Email: admin@example.com
+- Password: admin123
+
+## 🔧 Customization
+
+### Adding New Features
+
+1. **Create a new database model**:
+   - Add your model to `packages/database/prisma/schema.prisma`
+   - Run `npm run db:generate` to update Prisma client
+   - Run `npm run db:migrate` to update your database
+
+2. **Add a new API endpoint**:
+   - Create a new route in `apps/api/src/routes/`
+   - Register the route in `apps/api/src/app.ts`
+
+3. **Create a new UI component**:
+   - Add components to `packages/ui/src/components/`
+   - Import in your Next.js pages or components
+
+### Multi-tenant Customization
+
+The application supports multi-tenant configuration out-of-the-box:
+
+1. **Add a new tenant**:
+   - Use the admin interface or directly through Prisma
+   - Configure domain, theme colors, and other settings
+   
+2. **Configure tenant-specific features**:
+   - Each tenant can have unique branding, permissions, and data
+   - Tenant isolation is handled at the database and application levels
+
+## 📦 Deployment
+
+### Docker Deployment
+
+```bash
+# Build and start all services
+docker-compose up -d
+
+# Or use production-specific profile
+docker-compose --profile prod up -d
+```
+
+### Cloud Deployment
+
+The application is designed to be easily deployed to cloud providers:
+
+1. **Database**: Use managed PostgreSQL services
+2. **API & Web**: Deploy as containerized services or serverless functions
+3. **Search**: Use managed search services or deploy Typesense standalone
 
 ## ✨ Features
 
-- **Multi-tenant Architecture** — Built-in support for hosting multiple organizations
-- **Role-based Permissions** — Flexible access control system
-- **Blazing Fast Search** — Integrated Typesense for powerful search capabilities
-- **Type Safety** — End-to-end TypeScript with Prisma for database access
-- **Modern Frontend** — Next.js with React 18 and Tailwind CSS
-- **API Server** — Fast, schema-validated Fastify API
-- **Responsive Design** — Mobile-first design approach
-- **Docker Support** — Ready for containerized deployment
-
-## 🏗️ Architecture
-
-The application follows a modern, scalable architecture:
-
-```mermaid
-graph TD
-    Client[Client Browser] --> Frontend[Next.js Frontend]
-    Frontend --> API[Fastify API]
-    API --> DB[(PostgreSQL)]
-    API --> Search[(Typesense)]
-    SearchIndexer[Search Indexer] --> DB
-    SearchIndexer --> Search
-```
-
-## 🔧 Tech Stack
-
-<table>
-  <tr>
-    <th>Category</th>
-    <th>Technology</th>
-  </tr>
-  
-  <tr>
-    <td rowspan="2"><strong>Frontend</strong></td>
-    <td>Next.js 14</td>
-  </tr>
-  <tr>
-    <td>Tailwind CSS</td>
-  </tr>
-  
-  <tr>
-    <td rowspan="2"><strong>Backend</strong></td>
-    <td>Node.js 18 LTS</td>
-  </tr>
-  <tr>
-    <td>Fastify</td>
-  </tr>
-  
-  <tr>
-    <td rowspan="3"><strong>Data</strong></td>
-    <td>PostgreSQL 14</td>
-  </tr>
-  <tr>
-    <td>Prisma ORM</td>
-  </tr>
-  <tr>
-    <td>Typesense</td>
-  </tr>
-  
-  <tr>
-    <td rowspan="1"><strong>Infrastructure</strong></td>
-    <td>Docker & Docker Compose</td>
-  </tr>
-  
-  <tr>
-    <td rowspan="2"><strong>Authentication</strong></td>
-    <td>NextAuth.js</td>
-  </tr>
-  <tr>
-    <td>JWT</td>
-  </tr>
-</table>
-
-## 📁 Directory Structure
-
-```
-/
-├── apps/                      # Application services
-│   ├── web/                   # Next.js frontend application
-│   ├── api/                   # Fastify API service
-│   └── search-indexer/        # Background service for search indexing
-│
-├── packages/                  # Shared packages
-│   ├── database/              # Database client & models
-│   ├── auth/                  # Authentication utilities
-│   ├── config/                # Shared configuration
-│   └── ui/                    # Shared UI component library
-│
-└── docker/                    # Docker configuration
-```
-
-## 🚀 Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/fantastic-adventure.git
-
-# Install dependencies
-npm install
-
-# Run the setup script to configure environment variables
-npm run setup
-
-# Start development server
-npm run dev
-```
+- **Multi-tenant Architecture** — Securely host multiple organizations
+- **Role-based Permissions** — Flexible access control
+- **Integrated Search** — Fast, responsive search capability
+- **Type Safety** — End-to-end TypeScript with Prisma
+- **Modern Frontend** — Next.js with Tailwind CSS
+- **Docker Ready** — Containerized for easy deployment
 
 ## 📋 Prerequisites
 
 - Node.js 18 LTS (v18.18.0 or later)
-- Docker v24.0.0+ and Docker Compose v2.20.0+
-- PostgreSQL 14 (v14.10+)
-- Typesense v0.25.0+
+- Docker and Docker Compose for containerized development
+- PostgreSQL 14+ (auto-configured with Docker)
 
 ## 📄 License
 
