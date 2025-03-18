@@ -18,10 +18,11 @@
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "db:migrate": "turbo db:migrate",
-    "db:generate": "turbo db:generate"
+    "db:generate": "turbo db:generate",
+    "setup": "node setup.js"
   },
   "devDependencies": {
-    "prettier": "^3.1.0",
-    "turbo": "^1.10.16"
+    "prettier": "3.1.0",
+    "turbo": "1.10.16"
   }
 } 
