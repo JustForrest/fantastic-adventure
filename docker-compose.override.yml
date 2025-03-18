@@ -1,0 +1,7 @@
+# docker-compose.override.yml
+version: '3.9'
+
+services:
+  web:
+    volumes:
+      - ./apps/web:/app/apps/web:delegated
