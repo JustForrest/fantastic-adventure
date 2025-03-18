@@ -11,14 +11,14 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - realtyhub_postgres_data:/var/lib/postgresql/data
+      - fantastic_adventure_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - realtyhub-network
+      - fantastic-adventure-network
     env_file:
       - .env
 
@@ -28,7 +28,7 @@ services:
     ports:
       - '8108:8108'
     volumes:
-      - realtyhub_typesense_data:/data
+      - fantastic_adventure_typesense_data:/data
     environment:
       - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
       - TYPESENSE_DATA_DIR=/data
@@ -38,7 +38,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - realtyhub-network
+      - fantastic-adventure-network
 
   redis:
     image: redis:7-alpine
@@ -47,7 +47,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - realtyhub-network
+      - fantastic-adventure-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -80,7 +80,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - realtyhub-network
+      - fantastic-adventure-network
     deploy:
       resources:
         limits:
@@ -111,7 +111,7 @@ services:
       typesense:
         condition: service_healthy
     networks:
-      - realtyhub-network
+      - fantastic-adventure-network
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002/health"]
       interval: 10s
@@ -149,7 +149,7 @@ services:
       api:
         condition: service_healthy
     networks:
-      - realtyhub-network
+      - fantastic-adventure-network
     volumes:
       - turbo_cache:/root/.cache/turbo
     deploy:
@@ -170,7 +170,7 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - realtyhub-network
+      - fantastic-adventure-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -190,7 +190,7 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     networks:
-      - realtyhub-network
+      - fantastic-adventure-network
     depends_on:
       api:
         condition: service_healthy
@@ -198,17 +198,17 @@ services:
         condition: service_healthy
 
 volumes:
-  realtyhub_postgres_data:
-    name: realtyhub_postgres_data
-  realtyhub_typesense_data:
-    name: realtyhub_typesense_data
+  fantastic_adventure_postgres_data:
+    name: fantastic_adventure_postgres_data
+  fantastic_adventure_typesense_data:
+    name: fantastic_adventure_typesense_data
   turbo_cache:
     name: turbo_cache
   prometheus_data:
-    name: realtyhub_prometheus_data
+    name: fantastic_adventure_prometheus_data
   redis_data:
-    name: realtyhub_redis_data
+    name: fantastic_adventure_redis_data
 
 networks:
-  realtyhub-network:
+  fantastic-adventure-network:
     driver: bridge

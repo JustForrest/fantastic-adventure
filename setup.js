@@ -15,7 +15,7 @@ const rl = readline.createInterface({
 const defaultConfig = {
   POSTGRES_USER: 'postgres',
   POSTGRES_PASSWORD: generateRandomString(16),
-  POSTGRES_DB: 'realtyhub',
+  POSTGRES_DB: 'fantastic_adventure',
   TYPESENSE_API_KEY: generateRandomString(24),
   JWT_SECRET: generateRandomString(32),
   NEXTAUTH_SECRET: generateRandomString(32),
@@ -36,8 +36,8 @@ function prompt(question) {
 }
 
 async function setupProject() {
-  console.log('\n🚀 Welcome to RealtyHub Setup 🏠\n');
-  console.log('This script will help you set up your RealtyHub project.\n');
+  console.log('\n🚀 Welcome to Fantastic Adventure Setup\n');
+  console.log('This script will help you set up your project.\n');
 
   // Ask for database credentials
   const useDefaultCredentials = (await prompt('Use default database credentials? (Y/n): ')).toLowerCase() !== 'n';

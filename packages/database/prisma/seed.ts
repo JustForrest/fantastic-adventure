@@ -22,12 +22,12 @@ async function main() {
     },
   });
 
-  const agentRole = await prisma.role.upsert({
-    where: { id: 'agent-role' },
+  const userRole = await prisma.role.upsert({
+    where: { id: 'user-role' },
     update: {},
     create: {
-      id: 'agent-role',
-      name: 'Agent',
+      id: 'user-role',
+      name: 'User',
       permissions: [
         'manage_properties',
         'manage_listings',
@@ -35,14 +35,14 @@ async function main() {
     },
   });
 
-  console.log('Roles created:', { adminRole, agentRole });
+  console.log('Roles created:', { adminRole, userRole });
 
   // Create default tenant
   const defaultTenant = await prisma.tenant.upsert({
     where: { domain: 'localhost' },
     update: {},
     create: {
-      name: 'Demo Agency',
+      name: 'Demo Organization',
       domain: 'localhost',
       schemaName: 'default',
       logoUrl: '/assets/logo.svg',
@@ -85,17 +85,17 @@ async function main() {
       id: 'sample-property',
       tenantId: defaultTenant.id,
       address: '123 Main St',
-      city: 'San Francisco',
-      state: 'CA',
-      zipCode: '94105',
+      city: 'New York',
+      state: 'NY',
+      zipCode: '10001',
       bedrooms: 3,
       bathrooms: 2.5,
       squareFeet: 2200,
-      yearBuilt: 2005,
-      features: ['Garage', 'Fireplace', 'Backyard'],
+      yearBuilt: 2010,
+      features: ['Feature 1', 'Feature 2', 'Feature 3'],
       coordinates: {
-        lat: 37.7749,
-        lng: -122.4194,
+        lat: 40.7128,
+        lng: -74.0060,
       },
     },
   });
@@ -109,10 +109,10 @@ async function main() {
     create: {
       id: 'sample-listing',
       propertyId: sampleProperty.id,
-      price: 1250000,
-      listingType: 'Sale',
+      price: 500000,
+      listingType: 'Sample',
       status: 'Active',
-      description: 'Beautiful 3-bedroom home in a prime location.',
+      description: 'This is a sample listing description.',
       agentId: adminUser.id,
     },
   });
