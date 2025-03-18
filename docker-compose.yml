@@ -11,7 +11,16 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - realtyhub_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - realtyhub-network
+    env_file:
+      - .env
 
   typesense:
     image: typesense/typesense:0.25.0
@@ -19,15 +28,24 @@ services:
     ports:
       - '8108:8108'
     volumes:
-      - typesense_data:/data
+      - realtyhub_typesense_data:/data
     environment:
       - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
       - TYPESENSE_DATA_DIR=/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8108/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - realtyhub-network
 
   api:
     build:
       context: .
       dockerfile: ./docker/development/api.Dockerfile
+      args:
+        NODE_VERSION: 18.18.0
     restart: always
     ports:
       - '3001:3001'
@@ -37,8 +55,30 @@ services:
       - TYPESENSE_HOST=${TYPESENSE_HOST}
       - NODE_ENV=${NODE_ENV}
     depends_on:
-      - postgres
-      - typesense
+      postgres:
+        condition: service_healthy
+      typesense:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - realtyhub-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - turbo_cache:/root/.cache/turbo
+    profiles: ["dev", "prod"]
 
   search-indexer:
     build:
@@ -51,13 +91,19 @@ services:
       - TYPESENSE_HOST=${TYPESENSE_HOST}
       - NODE_ENV=${NODE_ENV}
     depends_on:
-      - postgres
-      - typesense
+      postgres:
+        condition: service_healthy
+      typesense:
+        condition: service_healthy
+    networks:
+      - realtyhub-network
 
   web:
     build:
       context: .
       dockerfile: ./docker/development/web.Dockerfile
+      args:
+        NODE_VERSION: 18.18.0
     restart: always
     ports:
       - '3000:3000'
@@ -69,7 +115,36 @@ services:
       - NEXT_PUBLIC_TYPESENSE_API_KEY=${NEXT_PUBLIC_TYPESENSE_API_KEY}
     depends_on:
       - api
+    networks:
+      - realtyhub-network
+    volumes:
+      - turbo_cache:/root/.cache/turbo
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - realtyhub-network
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
-  postgres_data:
-  typesense_data: 
+  realtyhub_postgres_data:
+    name: realtyhub_postgres_data
+  realtyhub_typesense_data:
+    name: realtyhub_typesense_data
+  turbo_cache:
+    name: turbo_cache
+
+networks:
+  realtyhub-network:
+    driver: bridge
+
+# Production-only services
+prometheus:
+  image: prom/prometheus:latest
+  profiles: ["prod"]
+  # ... config ... 
