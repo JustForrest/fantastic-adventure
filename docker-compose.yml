@@ -97,6 +97,19 @@ services:
         condition: service_healthy
     networks:
       - realtyhub-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 384M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles: ["dev", "prod"]
 
   web:
     build:
@@ -113,12 +126,26 @@ services:
       - NEXT_PUBLIC_TYPESENSE_PORT=${NEXT_PUBLIC_TYPESENSE_PORT}
       - NEXT_PUBLIC_TYPESENSE_PROTOCOL=${NEXT_PUBLIC_TYPESENSE_PROTOCOL}
       - NEXT_PUBLIC_TYPESENSE_API_KEY=${NEXT_PUBLIC_TYPESENSE_API_KEY}
+      - NEXT_TELEMETRY_DISABLED=1
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     networks:
       - realtyhub-network
     volumes:
+      - ./apps/web:/app/apps/web:delegated
       - turbo_cache:/root/.cache/turbo
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles: ["dev", "prod"]
 
   adminer:
     image: adminer:latest
@@ -131,6 +158,40 @@ services:
       postgres:
         condition: service_healthy
 
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: ["prod"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - realtyhub-network
+    depends_on:
+      - api
+      - web
+
+redis:
+  image: redis:7-alpine
+  ports:
+    - "6379:6379"
+  volumes:
+    - redis_data:/data
+  networks:
+    - realtyhub-network
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 5s
+    timeout: 3s
+    retries: 5
+  profiles: ["dev", "prod"]
+
 volumes:
   realtyhub_postgres_data:
     name: realtyhub_postgres_data
@@ -138,6 +199,8 @@ volumes:
     name: realtyhub_typesense_data
   turbo_cache:
     name: turbo_cache
+  prometheus_data:
+    name: realtyhub_prometheus_data
 
 networks:
   realtyhub-network:
