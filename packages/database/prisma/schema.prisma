@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public", "tenant_1", "tenant_2"]
+}
+
+model Tenant {
+  id          String     @id @default(cuid())
+  name        String
+  domain      String     @unique
+  logoUrl     String?
+  themeColors Json?
+  users       User[]
+  properties  Property[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@schema("public")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  tenantId      String
+  email         String    
+  name          String?
+  passwordHash  String?
+  roleId        String
+  isActive      Boolean   @default(true)
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  role          Role      @relation(fields: [roleId], references: [id])
+  createdListings Listing[]
+  
+  @@unique([email, tenantId])
+  @@index([tenantId])
+  @@schema("public")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String
+  permissions String[]
+  users       User[]
+  
+  @@schema("public")
+}
+
+model Property {
+  id          String      @id @default(cuid())
+  tenantId    String
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  coordinates Json?       // Latitude and longitude
+  bedrooms    Int?
+  bathrooms   Float?
+  squareFeet  Int?
+  lotSize     Float?
+  yearBuilt   Int?
+  features    String[]    // Array of property features
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  listings    Listing[]
+  media       Media[]
+  
+  @@index([tenantId])
+  @@index([city, state])
+  @@schema("public")
+}
+
+model Listing {
+  id           String    @id @default(cuid())
+  propertyId   String
+  price        Int
+  listingType  String    // "Sale" or "Rent"
+  status       String    // "Active", "Pending", "Sold", etc.
+  description  String
+  agentId      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  property     Property  @relation(fields: [propertyId], references: [id])
+  agent        User      @relation(fields: [agentId], references: [id])
+  
+  @@index([propertyId])
+  @@index([status])
+  @@schema("public")
+}
+
+model Media {
+  id         String   @id @default(cuid())
+  propertyId String
+  url        String
+  type       String   // "Image", "Video", "Document", etc.
+  isFeatured Boolean  @default(false)
+  property   Property @relation(fields: [propertyId], references: [id])
+  
+  @@schema("public")
+} 

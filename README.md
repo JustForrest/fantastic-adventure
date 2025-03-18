@@ -162,6 +162,19 @@ The architecture is designed to scale efficiently:
 - CDN for global asset delivery
 - Efficient caching strategies
 
+### Version Pinning Strategy
+
+To ensure long-term stability and reliability, RealtyHub adopts a strict version pinning approach:
+
+- **Node.js**: Pinned to LTS version 18 for long-term support and security updates
+- **PostgreSQL**: Using LTS version 14 with point release updates for security fixes
+- **Dependencies**: All NPM packages locked to specific versions
+- **Docker Images**: Tagged to specific versions rather than using "latest" tags
+- **Prisma**: Using stable releases with version constraints
+- **TypeScript**: Locked to recent stable version with explicit update strategy
+
+This approach minimizes "dependency hell" issues and provides a stable foundation for development.
+
 ## 🔍 Why This Stack?
 
 - **Next.js + Tailwind**: Provides excellent developer experience, SEO benefits, and responsive design
@@ -191,10 +204,10 @@ npm run dev
 
 ## 📋 Prerequisites
 
-- Node.js 18+
-- Docker and Docker Compose
-- PostgreSQL 14+
-- Typesense
+- Node.js 18 LTS (v18.18.0 or later)
+- Docker v24.0.0+ and Docker Compose v2.20.0+
+- PostgreSQL 14 LTS (v14.10+)
+- Typesense v0.25.0+
 
 ## 📄 License
 
