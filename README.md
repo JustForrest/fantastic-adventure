@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150?text=RealtyHub" alt="RealtyHub Logo" width="150px" />
+  <img src="https://via.placeholder.com/150x50/2D3748/FFFFFF?text=RealtyHub" alt="RealtyHub Logo" width="150px" />
   <h1>RealtyHub</h1>
   <p><em>Modern real estate listing management platform for agents and home buyers</em></p>
   
@@ -187,7 +187,7 @@ This approach minimizes "dependency hell" issues and provides a stable foundatio
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/realtyhub.git
+git clone https://github.com/JustForrest/fantastic-adventure.git
 
 # Install dependencies
 npm install

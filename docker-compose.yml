@@ -5,9 +5,9 @@ services:
     image: postgres:14.10-alpine
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=realtyhub
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - '5432:5432'
     volumes:
@@ -21,7 +21,7 @@ services:
     volumes:
       - typesense_data:/data
     environment:
-      - TYPESENSE_API_KEY=xyz
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
       - TYPESENSE_DATA_DIR=/data
 
   api:
@@ -32,10 +32,10 @@ services:
     ports:
       - '3001:3001'
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/realtyhub
-      - TYPESENSE_API_KEY=xyz
-      - TYPESENSE_HOST=typesense
-      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+      - TYPESENSE_HOST=${TYPESENSE_HOST}
+      - NODE_ENV=${NODE_ENV}
     depends_on:
       - postgres
       - typesense
@@ -46,10 +46,10 @@ services:
       dockerfile: ./docker/development/search-indexer.Dockerfile
     restart: always
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/realtyhub
-      - TYPESENSE_API_KEY=xyz
-      - TYPESENSE_HOST=typesense
-      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+      - TYPESENSE_HOST=${TYPESENSE_HOST}
+      - NODE_ENV=${NODE_ENV}
     depends_on:
       - postgres
       - typesense
@@ -62,11 +62,11 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
-      - NEXT_PUBLIC_TYPESENSE_HOST=localhost
-      - NEXT_PUBLIC_TYPESENSE_PORT=8108
-      - NEXT_PUBLIC_TYPESENSE_PROTOCOL=http
-      - NEXT_PUBLIC_TYPESENSE_API_KEY=xyz
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_TYPESENSE_HOST=${NEXT_PUBLIC_TYPESENSE_HOST}
+      - NEXT_PUBLIC_TYPESENSE_PORT=${NEXT_PUBLIC_TYPESENSE_PORT}
+      - NEXT_PUBLIC_TYPESENSE_PROTOCOL=${NEXT_PUBLIC_TYPESENSE_PROTOCOL}
+      - NEXT_PUBLIC_TYPESENSE_API_KEY=${NEXT_PUBLIC_TYPESENSE_API_KEY}
     depends_on:
       - api
 
