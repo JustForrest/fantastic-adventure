@@ -99,6 +99,9 @@ services:
       - realtyhub-network
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002/health"]
+    interval: 10s
+    timeout: 5s
+    retries: 3
     deploy:
       resources:
         limits:
@@ -158,25 +161,6 @@ services:
       postgres:
         condition: service_healthy
 
-  prometheus:
-    image: prom/prometheus:latest
-    profiles: ["prod"]
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./docker/prometheus:/etc/prometheus
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    networks:
-      - realtyhub-network
-    depends_on:
-      - api
-      - web
-
 redis:
   image: redis:7-alpine
   ports:
@@ -201,6 +185,8 @@ volumes:
     name: turbo_cache
   prometheus_data:
     name: realtyhub_prometheus_data
+  redis_data:
+    name: realtyhub_redis_data
 
 networks:
   realtyhub-network:
@@ -210,4 +196,20 @@ networks:
 prometheus:
   image: prom/prometheus:latest
   profiles: ["prod"]
-  # ... config ... 
+  ports:
+    - "9090:9090"
+  volumes:
+    - ./docker/prometheus:/etc/prometheus
+    - prometheus_data:/prometheus
+  command:
+    - '--config.file=/etc/prometheus/prometheus.yml'
+    - '--storage.tsdb.path=/prometheus'
+    - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+    - '--web.console.templates=/usr/share/prometheus/consoles'
+  networks:
+    - realtyhub-network
+  depends_on:
+    - api
+    - web
+
+# ... config ... 
