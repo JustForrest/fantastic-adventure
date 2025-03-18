@@ -40,6 +40,21 @@ services:
     networks:
       - realtyhub-network
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - realtyhub-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    profiles: ["dev", "prod"]
+
   api:
     build:
       context: .
@@ -99,9 +114,9 @@ services:
       - realtyhub-network
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002/health"]
-    interval: 10s
-    timeout: 5s
-    retries: 3
+      interval: 10s
+      timeout: 5s
+      retries: 3
     deploy:
       resources:
         limits:
@@ -160,21 +175,26 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    profiles: ["dev"]
 
-redis:
-  image: redis:7-alpine
-  ports:
-    - "6379:6379"
-  volumes:
-    - redis_data:/data
-  networks:
-    - realtyhub-network
-  healthcheck:
-    test: ["CMD", "redis-cli", "ping"]
-    interval: 5s
-    timeout: 3s
-    retries: 5
-  profiles: ["dev", "prod"]
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: ["prod"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - realtyhub-network
+    depends_on:
+      - api
+      - web
 
 volumes:
   realtyhub_postgres_data:
@@ -191,25 +211,3 @@ volumes:
 networks:
   realtyhub-network:
     driver: bridge
-
-# Production-only services
-prometheus:
-  image: prom/prometheus:latest
-  profiles: ["prod"]
-  ports:
-    - "9090:9090"
-  volumes:
-    - ./docker/prometheus:/etc/prometheus
-    - prometheus_data:/prometheus
-  command:
-    - '--config.file=/etc/prometheus/prometheus.yml'
-    - '--storage.tsdb.path=/prometheus'
-    - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-    - '--web.console.templates=/usr/share/prometheus/consoles'
-  networks:
-    - realtyhub-network
-  depends_on:
-    - api
-    - web
-
-# ... config ... 
