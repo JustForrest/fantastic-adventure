@@ -192,8 +192,10 @@ services:
     networks:
       - realtyhub-network
     depends_on:
-      - api
-      - web
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
 
 volumes:
   realtyhub_postgres_data:
