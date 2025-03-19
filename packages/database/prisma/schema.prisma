@@ -93,4 +93,16 @@ model Media {
   type       String   // "Image", "Video", "Document", etc.
   isFeatured Boolean  @default(false)
   property   Property @relation(fields: [propertyId], references: [id])
+}
+
+model Location {
+  id          String    @id @default(cuid())
+  propertyId  String    @unique
+  property    Property  @relation(fields: [propertyId], references: [id])
+  // PostGIS geometry field, will be used via raw SQL
+  geom        Unsupported("geometry(Point, 4326)")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([propertyId])
 } 

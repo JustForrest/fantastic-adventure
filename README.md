@@ -99,6 +99,52 @@ The application is designed to be easily deployed to cloud providers:
 - Docker and Docker Compose for containerized development
 - PostgreSQL 14+ (auto-configured with Docker)
 
+## PostgreSQL Extensions
+
+This project includes the following PostgreSQL extensions:
+
+- **pgcrypto**: Cryptographic functions for secure data storage
+- **PostGIS**: Spatial and geographic objects support
+- **pg_stat_statements**: SQL query performance tracking
+- **pg_trgm**: Text similarity search and indexing
+
+### Example Usage
+
+#### pgcrypto
+```sql
+-- Encrypt sensitive data
+SELECT encrypt('sensitive data', 'key', 'aes');
+```
+
+#### PostGIS
+```sql
+-- Create a point from latitude and longitude
+SELECT ST_SetSRID(ST_MakePoint(longitude, latitude), 4326);
+```
+
+#### pg_stat_statements
+```sql
+-- View performance statistics for queries
+SELECT query, calls, total_exec_time, rows
+FROM pg_stat_statements
+ORDER BY total_exec_time DESC
+LIMIT 10;
+```
+
+#### pg_trgm
+```sql
+-- Create a GIN index for fast text search
+CREATE INDEX trgm_idx ON your_table USING GIN (column gin_trgm_ops);
+
+-- Find similar strings
+SELECT * FROM your_table WHERE column % 'search term';
+```
+```
+
+These changes will add support for all the PostgreSQL extensions you requested. The extensions will be automatically enabled when the database container is first initialized, and the documentation will help your users understand how to use these powerful features.
+
+Would you like me to make any additional changes to support these extensions more fully in your application code?
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).

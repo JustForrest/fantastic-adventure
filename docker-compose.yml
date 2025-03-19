@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   postgres:
-    image: postgres:14.10-alpine
+    image: postgis/postgis:14-3.3-alpine
     restart: always
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -12,6 +12,7 @@ services:
       - '5432:5432'
     volumes:
       - fantastic_adventure_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
