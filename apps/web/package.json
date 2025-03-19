@@ -9,18 +9,20 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@repo/ui": "*",
     "@repo/auth": "*",
     "@repo/config": "*",
+    "@repo/ui": "*",
     "@types/node": "20.10.4",
     "@types/react": "18.2.42",
     "@types/react-dom": "18.2.17",
-    "next": "14.0.3",
-    "next-auth": "4.24.5",
+    "cmdk": "0.2.0",
+    "next": "14.2.25",
+    "next-auth": "4.24.11",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-instantsearch": "7.3.0",
-    "cmdk": "0.2.0"
+    "tsup": "8.4.0",
+    "typesense": "1.8.2"
   },
   "devDependencies": {
     "autoprefixer": "10.4.16",
@@ -30,4 +32,4 @@
     "tailwindcss": "3.3.6",
     "typescript": "5.3.3"
   }
-} 
+}
