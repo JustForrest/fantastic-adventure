@@ -2,11 +2,10 @@ module.exports = {
   root: true,
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@next/next/recommended'
+    'plugin:@typescript-eslint/recommended'
   ],
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', '@next/next'],
+  plugins: ['@typescript-eslint'],
   env: {
     node: true,
     es6: true,
@@ -19,7 +18,6 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@next/next/no-html-link-for-pages': 'off'
+    '@typescript-eslint/explicit-function-return-type': 'off'
   },
 }; 
