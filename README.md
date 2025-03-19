@@ -160,3 +160,48 @@ Would you like me to make any additional changes to support these extensions mor
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
+
+## 🛠️ Port Configuration
+
+By default, this project uses the following ports which may conflict with existing services:
+
+| Service    | Default Port |
+|------------|--------------|
+| PostgreSQL | 5432         |
+| Redis      | 6379         |
+| Typesense  | 8108         |
+| API        | 3001         |
+| Web        | 3000         |
+| Adminer    | 8080         |
+| Prometheus | 9090         |
+
+### Resolving Port Conflicts
+
+If you encounter port conflicts, you can:
+
+1. **During Setup**: 
+   - Run `npm run setup` and select "Yes" when asked to customize Docker ports
+   - Follow the prompts to specify alternative ports
+
+2. **Manually Edit Environment Variables**:
+   - Edit `.env` file to change service ports
+   - Update relevant `*_PORT` variables
+   - Ensure both `DATABASE_URL` and `DATABASE_URL_DOCKER` reflect your port changes
+
+3. **Override Docker Compose Port Mappings**:
+   You can create a `docker-compose.override.yml` file to change port mappings:
+
+   ```yaml
+   version: '3.9'
+   
+   services:
+     postgres:
+       ports:
+         - '5433:5432'  # Maps host port 5433 to container port 5432
+     
+     web:
+       ports:
+         - '3001:3000'  # Maps host port 3001 to container port 3000
+   ```
+
+This configuration will be automatically picked up by Docker Compose without modifying the original files.

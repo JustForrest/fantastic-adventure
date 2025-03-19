@@ -101,6 +101,26 @@ async function main() {
   });
 
   console.log('Sample property created:', sampleProperty);
+  
+  // Create corresponding location with PostGIS geometry
+  try {
+    await prisma.$executeRaw`
+      INSERT INTO "Location" (id, "propertyId", geom, "createdAt", "updatedAt")
+      VALUES (
+        'sample-location',
+        ${sampleProperty.id},
+        ST_SetSRID(ST_MakePoint(-74.0060, 40.7128), 4326),
+        NOW(),
+        NOW()
+      )
+      ON CONFLICT ("propertyId") DO UPDATE
+      SET geom = ST_SetSRID(ST_MakePoint(-74.0060, 40.7128), 4326),
+          "updatedAt" = NOW()
+    `;
+    console.log('Sample location with PostGIS geometry created');
+  } catch (error) {
+    console.error('Error creating PostGIS location:', error);
+  }
 
   // Create sample listing
   const sampleListing = await prisma.listing.upsert({
