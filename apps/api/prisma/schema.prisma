@@ -1,0 +1,113 @@
+// This is a reference to the shared schema in the database package
+// The actual schema is located at ../../packages/database/prisma/schema.prisma
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../../node_modules/.prisma/client"
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+// Import all models from the database package
+model Tenant {
+  id          String     @id @default(cuid())
+  name        String
+  domain      String     @unique
+  schemaName  String     @unique
+  logoUrl     String?
+  themeColors Json?
+  users       User[]
+  properties  Property[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model User {
+  id            String    @id @default(cuid())
+  tenantId      String
+  email         String    
+  name          String?
+  passwordHash  String?
+  roleId        String
+  isActive      Boolean   @default(true)
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  role          Role      @relation(fields: [roleId], references: [id])
+  createdListings Listing[]
+  
+  @@unique([email, tenantId])
+  @@index([tenantId])
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String
+  permissions String[]
+  users       User[]
+}
+
+model Property {
+  id          String      @id @default(cuid())
+  tenantId    String
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  coordinates Json?       // Latitude and longitude
+  bedrooms    Int?
+  bathrooms   Float?
+  squareFeet  Int?
+  lotSize     Float?
+  yearBuilt   Int?
+  features    String[]    // Array of property features
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  listings    Listing[]
+  media       Media[]
+  location    Location?
+  
+  @@index([tenantId])
+  @@index([city, state])
+}
+
+model Listing {
+  id           String    @id @default(cuid())
+  propertyId   String
+  price        Int
+  listingType  String    // "Sale" or "Rent"
+  status       String    // "Active", "Pending", "Sold", etc.
+  description  String
+  agentId      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  property     Property  @relation(fields: [propertyId], references: [id])
+  agent        User      @relation(fields: [agentId], references: [id])
+  
+  @@index([propertyId])
+  @@index([status])
+}
+
+model Media {
+  id         String   @id @default(cuid())
+  propertyId String
+  url        String
+  type       String   // "Image", "Video", "Document", etc.
+  isFeatured Boolean  @default(false)
+  property   Property @relation(fields: [propertyId], references: [id])
+}
+
+model Location {
+  id          String    @id @default(cuid())
+  propertyId  String    @unique
+  property    Property  @relation(fields: [propertyId], references: [id])
+  latitude    Float
+  longitude   Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([propertyId])
+} 
