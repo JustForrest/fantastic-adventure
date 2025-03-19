@@ -23,96 +23,60 @@ This will:
 2. Run database migrations
 3. Seed the database with initial data
 
-## PostGIS Integration
+## Geospatial Support
 
-The schema includes PostGIS support for geospatial queries. However, Prisma doesn't natively support PostGIS types, so we use the `Unsupported` type:
+The schema includes support for geospatial data. We're using standard latitude and longitude fields with PostGIS extension for advanced geospatial queries:
 
 ```prisma
 model Location {
   id          String    @id @default(cuid())
   propertyId  String    @unique
   property    Property  @relation(fields: [propertyId], references: [id])
-  // PostGIS geometry field, will be used via raw SQL
-  geom        Unsupported("geometry(Point, 4326)")
+  // Store coordinates as separate fields
+  latitude    Float
+  longitude   Float
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
 ```
 
-### Working with PostGIS in Code
+### Working with Locations in Code
 
-Since Prisma doesn't support PostGIS types natively, you'll need to use raw SQL queries for geospatial operations:
+You can use standard Prisma operations for basic CRUD:
 
 ```typescript
 import { prisma } from '@repo/database';
 
-// Example: Create a location with PostGIS point
+// Example: Create a location
 export async function createLocation(propertyId: string, lat: number, lng: number) {
-  // Use raw SQL to insert a point
-  return prisma.$executeRaw`
-    INSERT INTO "Location" (id, "propertyId", geom, "createdAt", "updatedAt")
-    VALUES (
-      ${cuid()},
-      ${propertyId},
-      ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326),
-      NOW(),
-      NOW()
-    )
-  `;
+  return prisma.location.create({
+    data: {
+      propertyId,
+      latitude: lat,
+      longitude: lng
+    }
+  });
 }
 
-// Example: Find properties within a certain distance (in meters)
-export async function findPropertiesNearby(lat: number, lng: number, radiusInMeters: number) {
-  const properties = await prisma.$queryRaw`
-    SELECT p.*, 
-           ST_Distance(
-             l.geom::geography, 
-             ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography
-           ) as distance
-    FROM "Property" p
-    JOIN "Location" l ON p.id = l."propertyId"
-    WHERE ST_DWithin(
-      l.geom::geography,
+// Example: Find locations within radius (requires PostGIS functions via raw SQL)
+export async function findLocationsWithinRadius(lat: number, lng: number, radiusInMeters: number) {
+  // Using prisma.$queryRaw to execute PostGIS functions
+  return prisma.$queryRaw`
+    SELECT l.*, p.*,
+    ST_Distance(
       ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
+      ST_SetSRID(ST_MakePoint(l."longitude", l."latitude"), 4326)::geography
+    ) as distance
+    FROM "Location" l
+    JOIN "Property" p ON p.id = l."propertyId"
+    WHERE ST_DWithin(
+      ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
+      ST_SetSRID(ST_MakePoint(l."longitude", l."latitude"), 4326)::geography,
       ${radiusInMeters}
     )
-    ORDER BY distance
+    ORDER BY distance ASC
   `;
-  
-  return properties;
 }
-```
-
-### Useful PostGIS Functions
-
-Here are some common PostGIS functions that you may use in your application:
-
-1. **Create a point**:
-   ```sql
-   ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)
-   ```
-
-2. **Calculate distance between points (in meters)**:
-   ```sql
-   ST_Distance(
-     geom1::geography,
-     geom2::geography
-   )
-   ```
-
-3. **Find points within a radius**:
-   ```sql
-   ST_DWithin(
-     geom1::geography,
-     geom2::geography,
-     radius_in_meters
-   )
-   ```
-
-4. **Convert from PostGIS to GeoJSON**:
-   ```sql
-   ST_AsGeoJSON(geom)
-   ```
 
 ## Multi-tenant Data Isolation
 

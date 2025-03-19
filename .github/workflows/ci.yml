@@ -73,6 +73,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Verify PostGIS Extension
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "SELECT PostGIS_version();"
+      
       - name: Generate Prisma Client
         run: npm run db:generate
         env:
