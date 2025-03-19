@@ -28,11 +28,17 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 # Copy necessary files
 COPY --from=builder /app/apps/search-indexer/dist ./dist
 COPY --from=builder /app/packages/database/dist ./packages/database/dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
+
+# Expose health check port
+EXPOSE 3002
 
 # Run the application
 CMD ["node", "dist/index.js"] 

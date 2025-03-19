@@ -1,0 +1,108 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/development/api.Dockerfile
+    restart: always
+    ports:
+      - '${API_PORT}:${API_PORT}'
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+      - TYPESENSE_HOST=typesense
+      - TYPESENSE_PORT=${TYPESENSE_PORT}
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
+      - API_PORT=${API_PORT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      typesense:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app/apps/api:delegated
+      - ./packages:/app/packages:delegated
+      - turbo_cache:/root/.cache/turbo
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:${API_PORT}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - fantastic-adventure-network
+
+  search-indexer:
+    build:
+      context: .
+      dockerfile: ./docker/development/search-indexer.Dockerfile
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+      - TYPESENSE_HOST=typesense
+      - TYPESENSE_PORT=${TYPESENSE_PORT}
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      typesense:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/search-indexer:/app/apps/search-indexer:delegated
+      - ./packages:/app/packages:delegated
+      - turbo_cache:/root/.cache/turbo
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - fantastic-adventure-network
+
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/development/web.Dockerfile
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_TYPESENSE_HOST=${NEXT_PUBLIC_TYPESENSE_HOST}
+      - NEXT_PUBLIC_TYPESENSE_PORT=${NEXT_PUBLIC_TYPESENSE_PORT}
+      - NEXT_PUBLIC_TYPESENSE_PROTOCOL=${NEXT_PUBLIC_TYPESENSE_PROTOCOL}
+      - NEXT_PUBLIC_TYPESENSE_API_KEY=${NEXT_PUBLIC_TYPESENSE_API_KEY}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./apps/web:/app/apps/web:delegated
+      - ./packages:/app/packages:delegated
+      - turbo_cache:/root/.cache/turbo
+    networks:
+      - fantastic-adventure-network
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - fantastic-adventure-network
+    depends_on:
+      postgres:
+        condition: service_healthy

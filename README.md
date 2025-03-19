@@ -68,19 +68,31 @@ The application supports multi-tenant configuration out-of-the-box:
 
 ### Docker Deployment
 
-```bash
-# Build and start all services
-docker-compose up -d
+The application includes several Docker Compose configurations for different environments:
 
-# Or use production-specific profile
-docker-compose --profile prod up -d
+```bash
+# Development setup with hot reloading
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+# Production setup
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+You can also run specific services:
+
+```bash
+# Run just the database and search services
+docker-compose -f docker-compose.yml up postgres typesense
+
+# Run the API service in development mode
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up api
 ```
 
 ### Cloud Deployment
 
 The application is designed to be easily deployed to cloud providers:
 
-1. **Database**: Use managed PostgreSQL services
+1. **Database**: Use managed PostgreSQL services with PostGIS support
 2. **API & Web**: Deploy as containerized services or serverless functions
 3. **Search**: Use managed search services or deploy Typesense standalone
 
