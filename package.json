@@ -21,7 +21,8 @@
     "db:generate": "turbo db:generate",
     "db:seed": "turbo db:seed",
     "db:setup": "turbo db:setup",
-    "setup": "node setup.js"
+    "setup": "node setup.js",
+    "test": "turbo test"
   },
   "devDependencies": {
     "prettier": "3.1.0",
