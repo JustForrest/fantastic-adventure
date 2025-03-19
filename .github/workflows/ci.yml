@@ -78,13 +78,13 @@ jobs:
           PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
           PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "SELECT PostGIS_version();"
       
-      - name: Generate Prisma Client
-        run: npm run db:generate
+      - name: Generate Prisma Client in Database Package
+        run: cd packages/database && npx prisma generate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
       
       - name: Run database migrations
-        run: npm run db:migrate
+        run: cd packages/database && npx prisma migrate deploy
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
       
