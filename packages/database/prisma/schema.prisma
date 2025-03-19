@@ -66,6 +66,7 @@ model Property {
   tenant      Tenant      @relation(fields: [tenantId], references: [id])
   listings    Listing[]
   media       Media[]
+  location    Location?
   
   @@index([tenantId])
   @@index([city, state])
