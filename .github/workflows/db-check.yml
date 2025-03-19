@@ -1,0 +1,68 @@
+name: Database Migration Check
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # Weekly on Monday
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  check-migrations:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgis/postgis:14-3.3-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Generate Prisma Client
+        run: npm run db:generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+      
+      - name: Check migrations
+        run: |
+          # Run migrations
+          npm run db:migrate
+          
+          # Run seed data to verify data integrity
+          npm run db:seed
+          
+          # Optional: Run a simple query to verify database state
+          npx prisma db execute --file ./packages/database/prisma/verify-state.sql
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+      
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Database Migration Check Failed',
+              body: 'The weekly database migration check has failed. Please investigate.',
+              labels: ['database', 'high-priority']
+            }); 
