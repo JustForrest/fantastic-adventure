@@ -15,7 +15,7 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "start": "turbo start",
-    "lint": "turbo lint",
+    "lint": "eslint \"**/*.{ts,tsx}\" --max-warnings 0",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "db:migrate": "turbo db:migrate",
     "db:generate": "turbo db:generate",
@@ -26,6 +26,10 @@
   },
   "devDependencies": {
     "prettier": "3.1.0",
-    "turbo": "1.10.16"
+    "turbo": "1.10.16",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@next/eslint-plugin-next": "^14.0.3"
   }
 } 

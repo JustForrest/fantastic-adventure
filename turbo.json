@@ -16,7 +16,17 @@
       "cache": false
     },
     "lint": {
-      "outputs": []
+      "outputs": [],
+      "inputs": [
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "app/**/*.tsx",
+        "app/**/*.ts",
+        "prisma/**/*.ts",
+        ".eslintrc.js",
+        ".eslintrc.json"
+      ],
+      "dependsOn": ["^lint"]
     },
     "test": {
       "dependsOn": ["^build"],
